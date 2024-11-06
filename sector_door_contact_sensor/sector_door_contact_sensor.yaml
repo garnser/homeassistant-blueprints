@@ -75,15 +75,16 @@ action:
           - condition: template
             value_template: "{{ states('counter.door_lock_retries') | int > max_retries }}"
         sequence:
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ enable_notification }}"
-                sequence:
-                  - action: !input notification_device
-                    metadata: {}
-                    data:
-                      message: "Door failed to lock after {{ max_retries }} attempts."
+          - sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ enable_notification }}"
+                    sequence:
+                      - action: !input notification_device
+                        metadata: {}
+                        data:
+                          message: "Door failed to lock after {{ max_retries }} attempts."
           - service: counter.reset
             target:
               entity_id: counter.door_lock_retries
