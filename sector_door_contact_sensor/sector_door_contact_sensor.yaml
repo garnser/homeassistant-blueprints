@@ -110,7 +110,7 @@ actions:
   - choose:
       - conditions:
           - condition: state
-            entity_id: door_sensor
+            entity_id: "{{ door_sensor }}"
             state: "on"
         sequence:
           - action: automation.trigger
@@ -122,7 +122,7 @@ actions:
   # Step 5: Verify that the door remains closed for the verification timeout
   - wait_for_trigger:
       - platform: state
-        entity_id: door_sensor
+        entity_id: "{{ door_sensor }}"
         to: "off"
     timeout: "{{ verification_timeout }}"
     continue_on_timeout: true
@@ -131,7 +131,7 @@ actions:
   - choose:
       - conditions:
           - condition: state
-            entity_id: door_sensor
+            entity_id: "{{ door_sensor }}"
             state: "on"
         sequence:
           - action: automation.trigger
