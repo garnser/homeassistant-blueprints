@@ -103,28 +103,25 @@ actions:
               skip_condition: true
 
   # Step 5: Verify that the door remains closed for the verification timeout
-  default:
-    - wait_for_trigger:
-        - platform: state
-          entity_id: !input door_sensor
-          to: "off"
-      timeout: "{{ verification_timeout }}"
-      continue_on_timeout: true
+  - wait_for_trigger:
+      - platform: state
+        entity_id: !input door_sensor
+        to: "off"
+    timeout: "{{ verification_timeout }}"
+    continue_on_timeout: true
 
-    # Step 6: Restart if the door reopened during the verification period
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: !input door_sensor
-              state: "on"
-          sequence:
-            - service: automation.trigger
-              target:
-                entity_id: this
-              data:
-                skip_condition: true
-
-    # Step 7: Lock the door if it stayed closed for the full verification timeout
+  # Step 6: Restart if the door reopened during the verification period
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: !input door_sensor
+            state: "on"
+        sequence:
+          - service: automation.trigger
+            target:
+              entity_id: this
+            data:
+              skip_condition: true
       default:
         - service: lock.lock
           target:
