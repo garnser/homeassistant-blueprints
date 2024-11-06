@@ -66,7 +66,7 @@ variables:
 
 trigger:
   - platform: state
-    entity_id: "{{ door_lock }}"
+    entity_id: !input door_lock
     to: "unlocked"
 
 condition: []
@@ -134,11 +134,12 @@ actions:
             entity_id: !input door_sensor
             state: "on"
         sequence:
-          - action: automation.trigger
-            target:
-              entity_id: "{{ trigger.entity_id }}"
-            data:
-              skip_condition: true
+          - sequence:
+              - action: automation.trigger
+                target:
+                  entity_id: "{{ trigger.entity_id }}"
+                data:
+                  skip_condition: true
     default:
       - action: lock.lock
         target:
