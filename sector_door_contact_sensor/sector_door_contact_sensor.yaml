@@ -70,6 +70,7 @@ condition: []
 
 actions:
   # Step 1: Check if retries have reached the limit (max_retries)
+actions:
   - choose:
       - conditions:
           - condition: template
@@ -81,13 +82,17 @@ actions:
                       - condition: template
                         value_template: "{{ enable_notification }}"
                     sequence:
-                      - action: !input notification_device
+                      - action: "{{ notification_device }}"
                         metadata: {}
                         data:
-                          message: "Door failed to lock after {{ max_retries }} attempts."
-          - service: counter.reset
+                          message: >-
+                            Door failed to lock after {{ max_retries }}
+                            attempts.
+          - action: counter.reset
+            metadata: {}
+            data: {}
             target:
-              entity_id: counter.door_lock_retries
+              entity_id: counter.test_counter
           - stop
 
   # Step 2: Increment retry counter
