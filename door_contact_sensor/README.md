@@ -83,14 +83,15 @@ When adding the automation, you'll need to configure the following inputs:
 | `max_retries` | The maximum number of attempts to lock the door before sending a notification. | Number (1-10) | `3` |
 | `enable_notification` | Whether to send a notification after reaching the maximum retry attempts. | Boolean | `false` |
 | `notification_device`	 | The notification service to use (e.g., notify.mobile_app_your_device). | Text | `""` (empty string) |
-| `door_close_timeout` | Time to wait for the door to close initially, in seconds. | Number (5-120) | `30` |
-| `verification_timeout` | Time to ensure the door remains closed, in seconds. | Number (5-120) | `30` |
+| `door_close_timeout` | Time to wait for the door to close initially, in seconds. | Number (=> 5) | `30` |
+| `verification_timeout` | Time to ensure the door remains closed, in seconds. | Number (=> 5) | `30` |
 
 ### Steps to Configure
 1. **Add the Automation:**
   - In Home Assistant, go to **Settings** > **Automations & Scenes** > **Blueprints**.
-  - Select `lock_door_with_retry.yaml`
+  - Select `Lock Door with Retry Limit and Custom Timeouts`
   - Fill in the required inputs as per your setup.
+  - Select `SAVE`
 2. **Configure Each Input:**
   - **Door Lock:** Select your smart lock entity (e.g., `lock.front_door`).
   - **Door Sensor:** Select your door sensor entity (e.g., `binary_sensor.front_door`).

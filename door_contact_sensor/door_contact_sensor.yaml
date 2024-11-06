@@ -52,7 +52,6 @@ blueprint:
       selector:
         number:
           min: 5
-          max: 120
           unit_of_measurement: seconds
     verification_timeout:
       name: Verification Timeout
@@ -61,7 +60,6 @@ blueprint:
       selector:
         number:
           min: 5
-          max: 120
           unit_of_measurement: seconds
 
 variables:
