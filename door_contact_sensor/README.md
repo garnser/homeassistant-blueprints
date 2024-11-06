@@ -44,6 +44,13 @@ Before setting up this automation, ensure you have the following:
 
 ## Installation
 
+### Counter variable
+
+**Create the Counter Helper:**
+- Go to **Settings** > **Devices & Services** > **Helpers** in your Home Assistant UI.
+- Click **Add Helper** and choose **Counter**.
+- Name the counter `door_lock_retries` (this is the default name used by the blueprint).
+
 ### Import
   - In Home Assistant, go to **Settings** > **Automations & Scenes** > **Blueprints**.
   - Select **Import Blueprint** and enter the url [https://raw.githubusercontent.com/garnser/homeassistant-blueprints/refs/heads/main/door_contact_sensor/door_contact_sensor.yaml](https://raw.githubusercontent.com/garnser/homeassistant-blueprints/refs/heads/main/door_contact_sensor/door_contact_sensor.yaml) to the blueprint.
@@ -60,10 +67,6 @@ Before setting up this automation, ensure you have the following:
   - Place the `door_contact_sensor/lock_door_with_retry.yaml` file into the `blueprints/automation/` directory. If the directories don't exist, create them.
 `mkdir -p /config/blueprints/automation/lock_door/`
 `cp lock_door_with_retry.yaml /config/blueprints/automation/lock_door/`
-3. **Create the Counter Helper:**
-  - Go to **Settings** > **Devices & Services** > **Helpers** in your Home Assistant UI.
-  - Click **Add Helper** and choose **Counter**.
-  - Name the counter `door_lock_retries` (this is the default name used by the blueprint).
 
 ---
 
