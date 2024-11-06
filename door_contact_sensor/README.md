@@ -58,14 +58,12 @@ Before setting up this automation, ensure you have the following:
 
 ### Manual
 1. **Clone the Repository:**
-
    ```bash
    git clone https://github.com/garnser/homeassistant-blueprints.git
    ```
 2. **Add the Blueprint:**
   - Navigate to your Home Assistant configuration directory.
   - Place the `door_contact_sensor/lock_door_with_retry.yaml` file into the `blueprints/automation/` directory. If the directories don't exist, create them.
-
   ```bash
   mkdir -p /config/blueprints/automation/lock_door/
   cp lock_door_with_retry.yaml /config/blueprints/automation/lock_door/
