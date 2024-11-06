@@ -72,9 +72,8 @@ action:
   # Step 1: Check if retries have reached the limit (max_retries)
   - choose:
       - conditions:
-          - condition: numeric_state
-            entity_id: counter.door_lock_retries
-            above: "{{ max_retries }}"
+          - condition: template
+            value_template: "{{ states('counter.door_lock_retries') | int > max_retries }}"
         sequence:
           - choose:
               - conditions: "{{ enable_notification }}"
