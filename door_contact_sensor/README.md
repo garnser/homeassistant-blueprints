@@ -44,20 +44,28 @@ Before setting up this automation, ensure you have the following:
 
 ## Installation
 
+### Import
+  - In Home Assistant, go to **Settings** > **Automations & Scenes** > **Blueprints**.
+  - Select **Import Blueprint** and enter the url [https://raw.githubusercontent.com/garnser/homeassistant-blueprints/refs/heads/main/door_contact_sensor/door_contact_sensor.yaml](https://raw.githubusercontent.com/garnser/homeassistant-blueprints/refs/heads/main/door_contact_sensor/door_contact_sensor.yaml) to the blueprint.
+  - Select **Preview** > **Import**
+
+### Manual
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/your-username/lock-door-automation.git
+   git clone https://github.com/garnser/homeassistant-blueprints.git
    ```
 2. **Add the Blueprint:**
   - Navigate to your Home Assistant configuration directory.
-  - Place the `lock_door_with_retry.yaml` file into the `blueprints/automation/` directory. If the directories don't exist, create them.
+  - Place the `door_contact_sensor/lock_door_with_retry.yaml` file into the `blueprints/automation/` directory. If the directories don't exist, create them.
 `mkdir -p /config/blueprints/automation/lock_door/`
 `cp lock_door_with_retry.yaml /config/blueprints/automation/lock_door/`
 3. **Create the Counter Helper:**
   - Go to **Settings** > **Devices & Services** > **Helpers** in your Home Assistant UI.
   - Click **Add Helper** and choose **Counter**.
   - Name the counter `door_lock_retries` (this is the default name used by the blueprint).
+
+---
 
 ## Configuration
 ### Blueprint Inputs
@@ -77,7 +85,7 @@ When adding the automation, you'll need to configure the following inputs:
 ### Steps to Configure
 1. **Add the Automation:**
   - In Home Assistant, go to **Settings** > **Automations & Scenes** > **Blueprints**.
-  - Select **Import Blueprint** and enter the `lock_door_with_retry.yaml` url, `https://raw.githubusercontent.com/garnser/homeassistant-blueprints/refs/heads/main/sector_door_contact_sensor/sector_door_contact_sensor.yaml`.
+  - Select `lock_door_with_retry.yaml`
   - Fill in the required inputs as per your setup.
 2. **Configure Each Input:**
   - **Door Lock:** Select your smart lock entity (e.g., `lock.front_door`).
@@ -90,6 +98,8 @@ When adding the automation, you'll need to configure the following inputs:
   - **Verification Timeout:** Set the time to verify the door remains closed (default is `30` seconds).
 3. **Save the Automation:**
   - After configuring all inputs, save the automation. It will now be active and ready to monitor your door lock.
+
+---
 
 ## Usage
 Once installed and configured, the automation works as follows:
@@ -110,13 +120,18 @@ Once installed and configured, the automation works as follows:
 
 **Automation Mode:** `restart` – ensures that the automation restarts its sequence if triggered again while already running.
 
+---
+
 ## Diagram
 
 ![diagram](door_contact_sensor.png "Diagram")
 
+---
+
 ## Contributing
 Contributions are welcome! If you have suggestions, bug reports, or enhancements, please open an issue or submit a pull request.
 
+---
 
 ## License
 This project is licensed under the [MIT License](/door_contact_sensor/LICENSE).
