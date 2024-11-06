@@ -95,7 +95,6 @@ actions:
           - action: counter.reset
             target:
               entity_id: counter.door_lock_retries
-          - action: stop
 
   # Step 2: Increment retry counter
   - action: counter.increment
