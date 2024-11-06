@@ -119,6 +119,6 @@ Contributions are welcome! If you have suggestions, bug reports, or enhancements
 
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](/LICENSE).
 
 For any queries or support, feel free to reach out via [GitHub Issues](https://github.com/garnser/homeassistant-blueprints/issues).
