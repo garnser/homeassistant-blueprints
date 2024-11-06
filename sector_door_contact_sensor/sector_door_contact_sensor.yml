@@ -24,12 +24,18 @@ blueprint:
           min: 1
           max: 10
           unit_of_measurement: retries
+    enable_notification:
+      name: Enable Notification
+      description: Whether to send a notification after max retries.
+      default: false
+      selector:
+        boolean: {}
     notification_device:
       name: Notification Device
       description: The device to send a notification to after maximum retries are reached.
       selector:
-        entity:
-          domain: mobile_app
+        text: {}
+      default: ""
     door_close_timeout:
       name: Door Close Timeout
       description: Time to wait for the door to close initially, in seconds.
@@ -53,6 +59,7 @@ variables:
   max_retries: !input max_retries
   door_close_timeout: !input door_close_timeout
   verification_timeout: !input verification_timeout
+  enable_notification: !input enable_notification
 
 trigger:
   - platform: state
@@ -69,11 +76,14 @@ action:
             entity_id: counter.door_lock_retries
             above: "{{ max_retries }}"
         sequence:
-          - service: notify.mobile_app
-            target:
-              entity_id: !input notification_device
-            data:
-              message: "Door failed to lock after {{ max_retries }} attempts."
+          - choose:
+              - conditions: "{{ enable_notification }}"
+                sequence:
+                  - service: notify.mobile_app
+                    target:
+                      entity_id: !input notification_device
+                    data:
+                      message: "Door failed to lock after {{ max_retries }} attempts."
           - service: counter.reset
             target:
               entity_id: counter.door_lock_retries
