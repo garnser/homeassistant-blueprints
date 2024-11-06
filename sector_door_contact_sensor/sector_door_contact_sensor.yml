@@ -7,18 +7,14 @@ blueprint:
       name: Door Lock
       description: The lock device to control.
       selector:
-        device:
-          integration: sector
-          entity:
-            domain: lock
+        entity:
+          domain: lock
     door_sensor:
       name: Door Sensor
       description: The door sensor to monitor (must detect open/closed states).
       selector:
-        device:
-          integration: sector
-          entity:
-            domain: binary_sensor
+        entity:
+          domain: binary_sensor
     max_retries:
       name: Max Retries
       description: The maximum number of attempts to lock the door before sending a notification.
@@ -32,8 +28,8 @@ blueprint:
       name: Notification Device
       description: The device to send a notification to after maximum retries are reached.
       selector:
-        device:
-          integration: mobile_app
+        entity:
+          domain: mobile_app
     door_close_timeout:
       name: Door Close Timeout
       description: Time to wait for the door to close initially, in seconds.
@@ -59,14 +55,13 @@ variables:
   verification_timeout: !input verification_timeout
 
 trigger:
-  - platform: device
-    device_id: !input door_lock
-    domain: lock
-    type: unlocked
+  - platform: state
+    entity_id: !input door_lock
+    to: "unlocked"
 
 condition: []
 
-action:
+actions:
   # Step 1: Check if retries have reached the limit (max_retries)
   - choose:
       - conditions:
@@ -74,7 +69,9 @@ action:
             entity_id: counter.door_lock_retries
             above: "{{ max_retries }}"
         sequence:
-          - service: notify.mobile_app_{{ !input notification_device }}
+          - service: notify.mobile_app
+            target:
+              entity_id: !input notification_device
             data:
               message: "Door failed to lock after {{ max_retries }} attempts."
           - service: counter.reset
@@ -88,16 +85,16 @@ action:
       entity_id: counter.door_lock_retries
 
   # Step 3: Check if the door is already closed or wait until it is
-  - wait_template: "{{ is_state(states('binary_sensor.' + (device_entities(!input door_sensor))[0]), 'on') }}"
+  - wait_template: "{{ is_state(!input door_sensor, 'off') }}"
     timeout: "{{ door_close_timeout }}"
     continue_on_timeout: true
 
-  # Step 4: Restart if the door didn't close within the timeout
+  # Step 4: Restart if the door didn’t close within the timeout
   - choose:
       - conditions:
           - condition: state
-            entity_id: "{{ (device_entities(!input door_sensor))[0] }}"
-            state: "off"
+            entity_id: !input door_sensor
+            state: "on"
         sequence:
           - service: automation.trigger
             target:
@@ -108,9 +105,9 @@ action:
   # Step 5: Verify that the door remains closed for the verification timeout
   default:
     - wait_for_trigger:
-        - entity_id: "{{ (device_entities(!input door_sensor))[0] }}"
+        - platform: state
+          entity_id: !input door_sensor
           to: "off"
-          platform: state
       timeout: "{{ verification_timeout }}"
       continue_on_timeout: true
 
@@ -118,8 +115,8 @@ action:
     - choose:
         - conditions:
             - condition: state
-              entity_id: "{{ (device_entities(!input door_sensor))[0] }}"
-              state: "off"
+              entity_id: !input door_sensor
+              state: "on"
           sequence:
             - service: automation.trigger
               target:
@@ -131,8 +128,9 @@ action:
       default:
         - service: lock.lock
           target:
-            device_id: !input door_lock
+            entity_id: !input door_lock
         - service: counter.reset
           target:
             entity_id: counter.door_lock_retries
+
 mode: restart
