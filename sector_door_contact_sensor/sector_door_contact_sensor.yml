@@ -1,0 +1,138 @@
+blueprint:
+  name: Lock Door with Retry Limit and Custom Timeouts
+  description: Automatically locks a door with retries if it doesn’t stay closed. Sends a notification after N failed attempts with customizable timeouts.
+  domain: automation
+  input:
+    door_lock:
+      name: Door Lock
+      description: The lock device to control.
+      selector:
+        device:
+          integration: sector
+          entity:
+            domain: lock
+    door_sensor:
+      name: Door Sensor
+      description: The door sensor to monitor (must detect open/closed states).
+      selector:
+        device:
+          integration: sector
+          entity:
+            domain: binary_sensor
+    max_retries:
+      name: Max Retries
+      description: The maximum number of attempts to lock the door before sending a notification.
+      default: 3
+      selector:
+        number:
+          min: 1
+          max: 10
+          unit_of_measurement: retries
+    notification_device:
+      name: Notification Device
+      description: The device to send a notification to after maximum retries are reached.
+      selector:
+        device:
+          integration: mobile_app
+    door_close_timeout:
+      name: Door Close Timeout
+      description: Time to wait for the door to close initially, in seconds.
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 120
+          unit_of_measurement: seconds
+    verification_timeout:
+      name: Verification Timeout
+      description: Time to ensure the door remains closed, in seconds.
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 120
+          unit_of_measurement: seconds
+
+variables:
+  max_retries: !input max_retries
+  door_close_timeout: !input door_close_timeout
+  verification_timeout: !input verification_timeout
+
+trigger:
+  - platform: device
+    device_id: !input door_lock
+    domain: lock
+    type: unlocked
+
+condition: []
+
+action:
+  # Step 1: Check if retries have reached the limit (max_retries)
+  - choose:
+      - conditions:
+          - condition: numeric_state
+            entity_id: counter.door_lock_retries
+            above: "{{ max_retries }}"
+        sequence:
+          - service: notify.mobile_app_{{ !input notification_device }}
+            data:
+              message: "Door failed to lock after {{ max_retries }} attempts."
+          - service: counter.reset
+            target:
+              entity_id: counter.door_lock_retries
+          - stop
+
+  # Step 2: Increment retry counter
+  - service: counter.increment
+    target:
+      entity_id: counter.door_lock_retries
+
+  # Step 3: Check if the door is already closed or wait until it is
+  - wait_template: "{{ is_state(states('binary_sensor.' + (device_entities(!input door_sensor))[0]), 'on') }}"
+    timeout: "{{ door_close_timeout }}"
+    continue_on_timeout: true
+
+  # Step 4: Restart if the door didn't close within the timeout
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: "{{ (device_entities(!input door_sensor))[0] }}"
+            state: "off"
+        sequence:
+          - service: automation.trigger
+            target:
+              entity_id: this
+            data:
+              skip_condition: true
+
+  # Step 5: Verify that the door remains closed for the verification timeout
+  default:
+    - wait_for_trigger:
+        - entity_id: "{{ (device_entities(!input door_sensor))[0] }}"
+          to: "off"
+          platform: state
+      timeout: "{{ verification_timeout }}"
+      continue_on_timeout: true
+
+    # Step 6: Restart if the door reopened during the verification period
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: "{{ (device_entities(!input door_sensor))[0] }}"
+              state: "off"
+          sequence:
+            - service: automation.trigger
+              target:
+                entity_id: this
+              data:
+                skip_condition: true
+
+    # Step 7: Lock the door if it stayed closed for the full verification timeout
+      default:
+        - service: lock.lock
+          target:
+            device_id: !input door_lock
+        - service: counter.reset
+          target:
+            entity_id: counter.door_lock_retries
+mode: restart
