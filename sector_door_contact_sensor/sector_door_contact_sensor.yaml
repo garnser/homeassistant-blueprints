@@ -32,7 +32,7 @@ blueprint:
         boolean: {}
     notification_device:
       name: Notification Device
-      description: The device to send a notification to after maximum retries are reached.
+      description: The notification service to use (e.g., notify.mobile_app_your_device).
       selector:
         text: {}
       default: ""
@@ -60,6 +60,9 @@ variables:
   door_close_timeout: !input door_close_timeout
   verification_timeout: !input verification_timeout
   enable_notification: !input enable_notification
+  door_sensor: !input door_sensor
+  door_lock: !input door_lock
+  notification_device: !input notification_device
 
 trigger:
   - platform: state
@@ -68,80 +71,74 @@ trigger:
 
 condition: []
 
-actions:
+action:
   # Step 1: Check if retries have reached the limit (max_retries)
-actions:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ states('counter.door_lock_retries') | int > max_retries }}"
+            value_template: "{{ states('counter.door_lock_retries') | int >= max_retries }}"
         sequence:
-          - sequence:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: "{{ enable_notification }}"
-                    sequence:
-                      - action: "{{ notification_device }}"
-                        metadata: {}
-                        data:
-                          message: >-
-                            Door failed to lock after {{ max_retries }}
-                            attempts.
-          - action: counter.reset
-            metadata: {}
-            data: {}
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ enable_notification }}"
+                sequence:
+                  - service: >
+                      {% if notification_device %}
+                        {{ notification_device }}
+                      {% else %}
+                        notify.notify
+                      {% endif %}
+                    data:
+                      message: >
+                        Door failed to lock after {{ max_retries }} attempts.
+          - service: counter.reset
             target:
-              entity_id: counter.test_counter
-          - stop
-
+              entity_id: counter.door_lock_retries
+          - stop: {}
   # Step 2: Increment retry counter
   - service: counter.increment
     target:
       entity_id: counter.door_lock_retries
-
   # Step 3: Check if the door is already closed or wait until it is
-  - wait_template: "{{ is_state(!input door_sensor, 'off') }}"
+  - wait_template: "{{ is_state(door_sensor, 'off') }}"
     timeout: "{{ door_close_timeout }}"
     continue_on_timeout: true
-
   # Step 4: Restart if the door didn’t close within the timeout
   - choose:
       - conditions:
           - condition: state
-            entity_id: !input door_sensor
+            entity_id: door_sensor
             state: "on"
         sequence:
           - service: automation.trigger
             target:
-              entity_id: this
+              entity_id: "{{ trigger.entity_id }}"
             data:
               skip_condition: true
-
   # Step 5: Verify that the door remains closed for the verification timeout
   - wait_for_trigger:
       - platform: state
-        entity_id: !input door_sensor
+        entity_id: door_sensor
         to: "off"
     timeout: "{{ verification_timeout }}"
     continue_on_timeout: true
-
   # Step 6: Restart if the door reopened during the verification period
   - choose:
       - conditions:
           - condition: state
-            entity_id: !input door_sensor
+            entity_id: door_sensor
             state: "on"
         sequence:
           - service: automation.trigger
             target:
-              entity_id: this
+              entity_id: "{{ trigger.entity_id }}"
             data:
               skip_condition: true
-      - sequence:  # adding an explicit sequence under default in the choose block
+      - default:
           - service: lock.lock
             target:
-              entity_id: !input door_lock
+              entity_id: door_lock
           - service: counter.reset
             target:
               entity_id: counter.door_lock_retries
