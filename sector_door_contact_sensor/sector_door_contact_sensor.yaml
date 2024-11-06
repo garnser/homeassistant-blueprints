@@ -80,9 +80,8 @@ action:
                   - condition: template
                     value_template: "{{ enable_notification }}"
                 sequence:
-                  - service: notify.mobile_app
-                    target:
-                      entity_id: !input notification_device
+                  - action: !input notification_device
+                    metadata: {}
                     data:
                       message: "Door failed to lock after {{ max_retries }} attempts."
           - service: counter.reset
