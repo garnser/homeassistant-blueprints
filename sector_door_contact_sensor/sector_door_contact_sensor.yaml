@@ -1,6 +1,9 @@
 blueprint:
   name: Lock Door with Retry Limit and Custom Timeouts
-  description: Automatically locks a door with retries if it doesn’t stay closed. Sends a notification after N failed attempts with customizable timeouts.
+  description: |
+    Automatically locks a door with retries if it doesn’t stay closed. Sends a notification after N failed attempts with customizable timeouts.
+
+    Please note that you **MUST** create `counter.door_lock_retries` using Helpers or configuration.yml
   domain: automation
   input:
     door_lock:
