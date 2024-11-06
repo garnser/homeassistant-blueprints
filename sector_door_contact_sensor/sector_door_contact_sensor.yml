@@ -61,7 +61,7 @@ trigger:
 
 condition: []
 
-actions:
+action:
   # Step 1: Check if retries have reached the limit (max_retries)
   - choose:
       - conditions:
@@ -122,12 +122,12 @@ actions:
               entity_id: this
             data:
               skip_condition: true
-    default:
-      - service: lock.lock
-        target:
-          entity_id: !input door_lock
-      - service: counter.reset
-        target:
-          entity_id: counter.door_lock_retries
+      - sequence:  # adding an explicit sequence under default in the choose block
+          - service: lock.lock
+            target:
+              entity_id: !input door_lock
+          - service: counter.reset
+            target:
+              entity_id: counter.door_lock_retries
 
 mode: restart
