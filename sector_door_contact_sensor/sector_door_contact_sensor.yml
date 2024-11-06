@@ -122,12 +122,12 @@ actions:
               entity_id: this
             data:
               skip_condition: true
-      default:
-        - service: lock.lock
-          target:
-            entity_id: !input door_lock
-        - service: counter.reset
-          target:
-            entity_id: counter.door_lock_retries
+        default:
+          - service: lock.lock
+            target:
+              entity_id: !input door_lock
+          - service: counter.reset
+            target:
+              entity_id: counter.door_lock_retries
 
 mode: restart
