@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Lock Door with Retry Limit and Custom Timeouts** is a Home Assistant automation blueprint designed to ensure your door remains securely locked. If the door fails to stay closed, the automation will attempt to lock it multiple times (up to a defined retry limit). After exceeding the maximum retries, it can send you a notification, allowing you to take further action. This blueprint offers customizable timeouts and integrates seamlessly with your existing Home Assistant setup.
+**Lock Door with Retry Limit and Custom Timeouts** is a Home Assistant automation blueprint designed to ensure your door remains securely locked. This automation monitors the state of your door lock and door sensor to maintain security. If the door fails to stay closed, the automation will attempt to lock it multiple times (up to a defined retry limit). After exceeding the maximum retries, it can send you a notification, allowing you to take further action. This blueprint offers customizable timeouts and integrates seamlessly with your existing Home Assistant setup.
 
 ---
 
