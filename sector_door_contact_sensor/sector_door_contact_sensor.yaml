@@ -76,7 +76,9 @@ action:
             value_template: "{{ states('counter.door_lock_retries') | int > max_retries }}"
         sequence:
           - choose:
-              - conditions: "{{ enable_notification }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ enable_notification }}"
                 sequence:
                   - service: notify.mobile_app
                     target:
