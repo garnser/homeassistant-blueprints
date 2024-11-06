@@ -64,7 +64,7 @@ Before setting up this automation, ensure you have the following:
 When adding the automation, you'll need to configure the following inputs:
 
 | Input | Description | Type | Default |
-|----|----|----|----|----|
+|----|----|----|----|
 | `door_lock` | The lock device to control. | Lock entity | *None* |
 | `door_sensor` | The door sensor to monitor (must detect open/closed states). | Binary sensor | *None* |
 | `counter_variable` | The counter variable created using Helpers. | Text | `counter.door_lock_retries` |
