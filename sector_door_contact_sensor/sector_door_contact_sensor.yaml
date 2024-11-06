@@ -68,7 +68,7 @@ trigger:
 
 condition: []
 
-action:
+actions:
   # Step 1: Check if retries have reached the limit (max_retries)
   - choose:
       - conditions:
