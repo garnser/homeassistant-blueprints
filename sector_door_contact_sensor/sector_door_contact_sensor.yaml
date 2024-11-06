@@ -71,7 +71,7 @@ trigger:
 
 condition: []
 
-action:
+actions:
   # Step 1: Check if retries have reached the limit (max_retries)
   - choose:
       - conditions:
@@ -83,7 +83,7 @@ action:
                   - condition: template
                     value_template: "{{ enable_notification }}"
                 sequence:
-                  - service: >
+                  - action: >
                       {% if notification_device %}
                         {{ notification_device }}
                       {% else %}
@@ -92,18 +92,21 @@ action:
                     data:
                       message: >
                         Door failed to lock after {{ max_retries }} attempts.
-          - service: counter.reset
+          - action: counter.reset
             target:
               entity_id: counter.door_lock_retries
-          - stop: {}
+          - action: stop
+
   # Step 2: Increment retry counter
-  - service: counter.increment
+  - action: counter.increment
     target:
       entity_id: counter.door_lock_retries
+
   # Step 3: Check if the door is already closed or wait until it is
   - wait_template: "{{ is_state(door_sensor, 'off') }}"
     timeout: "{{ door_close_timeout }}"
     continue_on_timeout: true
+
   # Step 4: Restart if the door didn’t close within the timeout
   - choose:
       - conditions:
@@ -111,11 +114,12 @@ action:
             entity_id: door_sensor
             state: "on"
         sequence:
-          - service: automation.trigger
+          - action: automation.trigger
             target:
               entity_id: "{{ trigger.entity_id }}"
             data:
               skip_condition: true
+
   # Step 5: Verify that the door remains closed for the verification timeout
   - wait_for_trigger:
       - platform: state
@@ -123,6 +127,7 @@ action:
         to: "off"
     timeout: "{{ verification_timeout }}"
     continue_on_timeout: true
+
   # Step 6: Restart if the door reopened during the verification period
   - choose:
       - conditions:
@@ -130,16 +135,16 @@ action:
             entity_id: door_sensor
             state: "on"
         sequence:
-          - service: automation.trigger
+          - action: automation.trigger
             target:
               entity_id: "{{ trigger.entity_id }}"
             data:
               skip_condition: true
       - default:
-          - service: lock.lock
+          - action: lock.lock
             target:
               entity_id: door_lock
-          - service: counter.reset
+          - action: counter.reset
             target:
               entity_id: counter.door_lock_retries
 
