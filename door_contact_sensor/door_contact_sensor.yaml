@@ -112,7 +112,7 @@ actions:
       entity_id: !input counter_variable
 
   # Step 3: Check if the door is already closed or wait until it is
-  - wait_template: "{{ is_state(!input door_sensor, 'off') }}"
+  - wait_template: "{{ is_state(door_sensor, 'off') }}"
     timeout:
       minutes: !input door_close_timeout
     continue_on_timeout: true
