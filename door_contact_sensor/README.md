@@ -83,8 +83,8 @@ When adding the automation, you'll need to configure the following inputs:
 | `max_retries` | The maximum number of attempts to lock the door before sending a notification. | Number (1-10) | `3` |
 | `enable_notification` | Whether to send a notification after reaching the maximum retry attempts. | Boolean | `false` |
 | `notification_device`	 | The notification service to use (e.g., notify.mobile_app_your_device). | Text | `""` (empty string) |
-| `door_close_timeout` | Time to wait for the door to close initially, in seconds. | Number (=> 5) | `30` |
-| `verification_timeout` | Time to ensure the door remains closed, in seconds. | Number (=> 5) | `30` |
+| `door_close_timeout` | Time to wait for the door to close initially, in minutes. | Number (=> 1) | `1` |
+| `verification_timeout` | Time to ensure the door remains closed, in minutes. | Number (=> 1) | `1` |
 
 ### Steps to Configure
 1. **Add the Automation:**
@@ -99,8 +99,8 @@ When adding the automation, you'll need to configure the following inputs:
   - **Max Retries:** Set the number of retry attempts (default is `3`).
   - **Enable Notification:** Toggle to `true` if you want to receive notifications.
   - **Notification Device:** Specify your notification service (e.g., `notify.mobile_app_your_device`). Leave empty to use the default `notify.notify`.
-  - **Door Close Timeout:** Set the initial wait time for the door to close (default is `30` seconds).
-  - **Verification Timeout:** Set the time to verify the door remains closed (default is `30` seconds).
+  - **Door Close Timeout:** Set the initial wait time for the door to close (default is `1` minute).
+  - **Verification Timeout:** Set the time to verify the door remains closed (default is `1` minute).
 3. **Save the Automation:**
   - After configuring all inputs, save the automation. It will now be active and ready to monitor your door lock.
 
