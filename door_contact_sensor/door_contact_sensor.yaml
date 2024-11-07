@@ -94,10 +94,9 @@ actions:
                   - condition: template
                     value_template: "{{ enable_notification }}"
                 sequence:
-                  - action: notify.notify
+                  - action: "{{ notification_device if notification_device else 'notify.notify' }}"
                     data:
                       message: "Door failed to lock after {{ max_retries }} attempts."
-                    target: "{{ notification_device if notification_device else 'notify.notify' }}"
           # Reset retry counter if max retries are reached
           - action: counter.reset
             target:
