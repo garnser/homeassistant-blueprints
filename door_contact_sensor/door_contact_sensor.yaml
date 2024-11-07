@@ -47,7 +47,7 @@ blueprint:
       default: ""
     door_close_timeout:
       name: Door Close Timeout
-      description: Time to wait for the door to close initially, in seconds.
+      description: Time to wait for the door to close initially, in minutes.
       default: 1
       selector:
         number:
@@ -56,7 +56,7 @@ blueprint:
           unit_of_measurement: minutes
     verification_timeout:
       name: Verification Timeout
-      description: Time to ensure the door remains closed, in seconds.
+      description: Time to ensure the door remains closed, in minutes.
       default: 1
       selector:
         number:
@@ -86,33 +86,30 @@ actions:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ states('counter.door_lock_retries') | int >= max_retries }}"
+            value_template: "{{ states(counter_variable) | int >= max_retries }}"
         sequence:
           - choose:
+              # Send notification if enabled and retry limit is reached
               - conditions:
                   - condition: template
-                    value_template: !input enable_notification
+                    value_template: "{{ enable_notification }}"
                 sequence:
-                  - action: >
-                      {% if notification_device %}
-                        {{ notification_device }}
-                      {% else %}
-                        notify.notify
-                      {% endif %}
+                  - action: notify.notify
                     data:
-                      message: >
-                        Door failed to lock after {{ max_retries }} attempts.
+                      message: "Door failed to lock after {{ max_retries }} attempts."
+                    target: "{{ notification_device if notification_device else 'notify.notify' }}"
+          # Reset retry counter if max retries are reached
           - action: counter.reset
             target:
-              entity_id: !input counter_variable
+              entity_id: "{{ counter_variable }}"
 
   # Step 2: Increment retry counter
   - action: counter.increment
     target:
-      entity_id: !input counter_variable
+      entity_id: "{{ counter_variable }}"
 
   # Step 3: Check if the door is already closed or wait until it is
-  - wait_template: "{{ is_state(!input door_sensor, 'off') }}"
+  - wait_template: "{{ is_state(door_sensor, 'off') }}"
     timeout:
       minutes: "{{ door_close_timeout }}"
     continue_on_timeout: true
@@ -121,7 +118,7 @@ actions:
   - choose:
       - conditions:
           - condition: state
-            entity_id: !input door_sensor
+            entity_id: "{{ door_sensor }}"
             state: "on"
         sequence:
           - action: automation.trigger
@@ -133,31 +130,30 @@ actions:
   # Step 5: Verify that the door remains closed for the verification timeout
   - wait_for_trigger:
       - platform: state
-        entity_id: !input door_sensor
+        entity_id: "{{ door_sensor }}"
         to: "off"
     timeout:
-      minutes: !input verification_timeout
+      minutes: "{{ verification_timeout }}"
     continue_on_timeout: true
 
   # Step 6: Restart if the door reopened during the verification period
   - choose:
       - conditions:
           - condition: state
-            entity_id: !input door_sensor
+            entity_id: "{{ door_sensor }}"
             state: "on"
         sequence:
-          - sequence:
-              - action: automation.trigger
-                target:
-                  entity_id: "{{ this.entity_id }}"
-                data:
-                  skip_condition: true
+          - action: automation.trigger
+            target:
+              entity_id: "{{ this.entity_id }}"
+            data:
+              skip_condition: true
     default:
+      # Lock the door and reset the retry counter if successful
       - action: lock.lock
         target:
-          entity_id: !input door_lock
+          entity_id: "{{ door_lock }}"
       - action: counter.reset
         target:
-          entity_id: !input counter_variable
-
+          entity_id: "{{ counter_variable }}"
 mode: restart
