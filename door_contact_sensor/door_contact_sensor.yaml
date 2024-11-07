@@ -118,7 +118,7 @@ actions:
   - choose:
       - conditions:
           - condition: state
-            entity_id: "{{ door_sensor }}"
+            entity_id: !input door_sensor
             state: "on"
         sequence:
           - action: automation.trigger
@@ -130,7 +130,7 @@ actions:
   # Step 5: Verify that the door remains closed for the verification timeout
   - wait_for_trigger:
       - platform: state
-        entity_id: "{{ door_sensor }}"
+        entity_id: !input door_sensor
         to: "off"
     timeout:
       minutes: "{{ verification_timeout }}"
@@ -140,7 +140,7 @@ actions:
   - choose:
       - conditions:
           - condition: state
-            entity_id: "{{ door_sensor }}"
+            entity_id: !input door_sensor
             state: "on"
         sequence:
           - action: automation.trigger
@@ -152,7 +152,7 @@ actions:
       # Lock the door and reset the retry counter if successful
       - action: lock.lock
         target:
-          entity_id: "{{ door_lock }}"
+          entity_id: !input door_lock
       - action: counter.reset
         target:
           entity_id: "{{ counter_variable }}"
