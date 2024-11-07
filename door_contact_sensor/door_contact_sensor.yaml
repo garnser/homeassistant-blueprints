@@ -48,19 +48,21 @@ blueprint:
     door_close_timeout:
       name: Door Close Timeout
       description: Time to wait for the door to close initially, in seconds.
-      default: 30
+      default: 1
       selector:
         number:
-          min: 5
-          unit_of_measurement: seconds
+          min: 1
+          max: 15
+          unit_of_measurement: minutes
     verification_timeout:
       name: Verification Timeout
       description: Time to ensure the door remains closed, in seconds.
-      default: 30
+      default: 1
       selector:
         number:
-          min: 5
-          unit_of_measurement: seconds
+          min: 1
+          max: 15
+          unit_of_measurement: minutes
 
 variables:
   max_retries: !input max_retries
@@ -89,7 +91,7 @@ actions:
           - choose:
               - conditions:
                   - condition: template
-                    value_template: "{{ enable_notification }}"
+                    value_template: !input enable_notification
                 sequence:
                   - action: >
                       {% if notification_device %}
@@ -111,7 +113,8 @@ actions:
 
   # Step 3: Check if the door is already closed or wait until it is
   - wait_template: "{{ is_state(!input door_sensor, 'off') }}"
-    timeout: "{{ door_close_timeout }}"
+    timeout:
+      minutes: !input door_close_timeout
     continue_on_timeout: true
 
   # Step 4: Restart if the door didn’t close within the timeout
@@ -132,7 +135,8 @@ actions:
       - platform: state
         entity_id: !input door_sensor
         to: "off"
-    timeout: "{{ verification_timeout }}"
+    timeout:
+      minutes: !input verification_timeout
     continue_on_timeout: true
 
   # Step 6: Restart if the door reopened during the verification period
