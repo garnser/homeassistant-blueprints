@@ -80,7 +80,7 @@ trigger:
     to: "unlocked"
   - platform: state
     entity_id: !input door_sensor
-    to: "open"
+    to: "on"
 
 condition: []
 
