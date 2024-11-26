@@ -78,6 +78,9 @@ trigger:
   - platform: state
     entity_id: !input door_lock
     to: "unlocked"
+  - platform: state
+    entity_id: !input door_sensor
+    to: "open"
 
 condition: []
 
