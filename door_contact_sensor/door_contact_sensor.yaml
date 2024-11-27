@@ -128,7 +128,7 @@ actions:
       message: "Waiting for door sensor to close ({{ door_sensor }})."
   - wait_template: "{{ is_state(door_sensor, 'off') }}"
     timeout:
-      minutes: "{{ door_close_timeout }}"
+      minutes: !input door_close_timeout
     continue_on_timeout: true  # Continue even if the timeout is reached.
 
   # Check if the door is still open after the timeout, and if so, restart the automation.
@@ -160,7 +160,7 @@ actions:
         entity_id: !input door_sensor
         to: "off"
     timeout:
-      minutes: "{{ verification_timeout }}"
+      minutes: !input verification_timeout
     continue_on_timeout: true
 
   # If the door is still open after verification, restart the automation.
