@@ -86,6 +86,12 @@ trigger:
 condition: []
 
 actions:
+  # Notify the start of the automation and the current retry count.
+  - action: persistent_notification.create
+    data:
+      title: "Automation Debug"
+      message: "Automation started. Counter: {{ states(counter_variable) | int }}"
+
   # Check if the maximum number of retries has been reached.
   - choose:
       - conditions:
@@ -107,28 +113,48 @@ actions:
               entity_id: "{{ counter_variable }}"
 
   # Increment the retry counter.
+  - action: persistent_notification.create
+    data:
+      title: "Automation Debug"
+      message: "Incrementing counter. Current value: {{ states(counter_variable) | int }}"
   - action: counter.increment
     target:
       entity_id: "{{ counter_variable }}"
 
   # Wait for the door to close.
+  - action: persistent_notification.create
+    data:
+      title: "Automation Debug"
+      message: "Waiting for door sensor to close ({{ door_sensor }})."
   - wait_template: "{{ is_state(door_sensor, 'off') }}"
     timeout:
       minutes: !input door_close_timeout
     continue_on_timeout: true  # Continue even if the timeout is reached.
 
   # Check if the door is still open after the timeout, and if so, restart the automation.
+  - action: persistent_notification.create
+    data:
+      title: "Automation Debug"
+      message: "Door sensor state: {{ is_state(door_sensor, 'on') }}"
   - choose:
       - conditions:
           - condition: state
             entity_id: !input door_sensor
             state: "on"
         sequence:
+          - action: persistent_notification.create
+            data:
+              title: "Automation Debug"
+              message: "Restarting automation due to open door."
           - action: automation.trigger
             target:
               entity_id: "{{ this.entity_id }}"
 
   # Wait for the door to stay closed for the verification timeout period.
+  - action: persistent_notification.create
+    data:
+      title: "Automation Debug"
+      message: "Waiting for verification timeout or door to close."
   - wait_for_trigger:
       - platform: state
         entity_id: !input door_sensor
@@ -138,22 +164,40 @@ actions:
     continue_on_timeout: true
 
   # If the door is still open after verification, restart the automation.
+  - action: persistent_notification.create
+    data:
+      title: "Automation Debug"
+      message: "Verification check complete. Door sensor state: {{ is_state(door_sensor, 'on') }}"
   - choose:
       - conditions:
           - condition: state
             entity_id: !input door_sensor
             state: "on"
         sequence:
+          - action: persistent_notification.create
+            data:
+              title: "Automation Debug"
+              message: "Restarting automation again due to open door."
           - action: automation.trigger
             target:
               entity_id: "{{ this.entity_id }}"
     # If the door is confirmed closed, attempt to lock it and reset the counter.
     default:
+      - action: persistent_notification.create
+        data:
+          title: "Automation Debug"
+          message: "Locking door. Resetting counter."
       - action: lock.lock
         target:
           entity_id: !input door_lock
       - action: counter.reset
         target:
           entity_id: "{{ counter_variable }}"
+
+  # Notify that the automation has completed successfully.
+  - action: persistent_notification.create
+    data:
+      title: "Automation Debug"
+      message: "Automation finished."
 
 mode: restart  # Allows the automation to restart if triggered again while running.
